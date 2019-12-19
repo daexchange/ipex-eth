@@ -76,9 +76,11 @@ public class EthService {
     }
 
 
-    public MessageResult transferFromWithdrawWallet(String toAddress, BigDecimal amount, boolean sync, String withdrawId) {
-        return transfer(coin.getKeystorePath() + "/" + coin.getWithdrawWallet(), coin.getWithdrawWalletPassword(), toAddress, amount, sync,withdrawId);
-    }
+	public MessageResult transferFromWithdrawWallet(String password, Account account, String toAddress,
+			BigDecimal amount, boolean sync, String withdrawId) {
+		return transfer(coin.getKeystorePath() + "/" + account.getWalletFile(), password, toAddress, amount, sync,
+				withdrawId);
+	}
 
     public MessageResult transfer(String walletFile, String password, String toAddress, BigDecimal amount,boolean sync,String withdrawId) {
         Credentials credentials;
@@ -165,28 +167,27 @@ public class EthService {
 		}
 	}
 
-    public MessageResult transferTokenFromWithdrawWallet(String toAddress, BigDecimal amount, String contractAddress,
-			int decimals, String coinName, boolean sync, String withdrawId) {
-        Credentials credentials;
-        try {
-            //解锁提币钱包
-            credentials = WalletUtils.loadCredentials(coin.getWithdrawWalletPassword(), coin.getKeystorePath() + "/" + coin.getWithdrawWallet());
-        } catch (IOException e) {
-            e.printStackTrace();
-            return new MessageResult(500, "私钥文件不存在");
-        } catch (CipherException e) {
-            e.printStackTrace();
-            return new MessageResult(500, "解密失败，密码不正确");
-        }
-        if(sync) {
-            return paymentHandler.transferToken(credentials, toAddress, amount, contractAddress, decimals, coinName);
-        }
-        else{
-            paymentHandler.transferTokenAsync(credentials, toAddress, amount, contractAddress, decimals, coinName,
+	public MessageResult transferTokenFromWithdrawWallet(String password, Account account, String toAddress,
+			BigDecimal amount, String contractAddress, int decimals, String coinName, boolean sync, String withdrawId) {
+		Credentials credentials;
+		try {
+			// 解锁提币钱包
+			credentials = WalletUtils.loadCredentials(password, coin.getKeystorePath() + "/" + account.getWalletFile());
+		} catch (IOException e) {
+			e.printStackTrace();
+			return new MessageResult(500, "私钥文件不存在");
+		} catch (CipherException e) {
+			e.printStackTrace();
+			return new MessageResult(500, "解密失败，密码不正确");
+		}
+		if (sync) {
+			return paymentHandler.transferToken(credentials, toAddress, amount, contractAddress, decimals, coinName);
+		} else {
+			paymentHandler.transferTokenAsync(credentials, toAddress, amount, contractAddress, decimals, coinName,
 					withdrawId);
-            return new MessageResult(0,"提交成功");
-        }
-    }
+			return new MessageResult(0, "提交成功");
+		}
+	}
     
     public BigDecimal getTokenBalance(String accountAddress,String contractAddress,int decimals) throws IOException {
         BigInteger balance = BigInteger.ZERO;
