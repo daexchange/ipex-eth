@@ -1,10 +1,11 @@
 package ai.turbochain.ipex.wallet.entity;
 
-import lombok.Builder;
-import org.web3j.crypto.Credentials;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
+import org.web3j.crypto.Credentials;
+
+import lombok.Builder;
 
 @Builder
 public class Payment {
